@@ -1,9 +1,7 @@
 -- ALX Airbnb Database — schema.sql (PostgreSQL)
 
--- Optional but recommended for case-insensitive unique emails
 CREATE EXTENSION IF NOT EXISTS citext;
 
--- Optional (if you want UUID defaults via gen_random_uuid)
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- ================
@@ -96,7 +94,6 @@ CREATE TABLE IF NOT EXISTS reviews (
   rating       INT         NOT NULL CHECK (rating BETWEEN 1 AND 5),
   comment      TEXT        NOT NULL,
   created_at   TIMESTAMPTZ NOT NULL DEFAULT now(),
-  -- one review per user per property (data quality improvement)
   UNIQUE (user_id, property_id)
 );
 
