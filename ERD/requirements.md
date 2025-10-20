@@ -69,3 +69,10 @@ Designing an Entity–Relationship Diagram (ERD) for an Airbnb-like system that 
 | **User → Review (writes)**            | `User (1) —— (0..N) Review`      | `Review.user_id → User.user_id`              | A user can write zero or many reviews; each review has one author.               |
 | **User → Message (sends)**            | `User (1) —— (0..N) Message`     | `Message.sender_id → User.user_id`           | A user can send zero or many messages; each message has one sender.              |
 | **User → Message (receives)**         | `User (1) —— (0..N) Message`     | `Message.recipient_id → User.user_id`        | A user can receive zero or many messages; each message has one recipient.        |
+
+
+## Visual Representation
+
+A visual Entity–Relationship Diagram (ERD) illustrating the entities and relationships described above. The diagram shows primary keys (PK), foreign keys (FK), and cardinalities for User, Property, Booking, Payment, Review, and Message.
+
+![ERD diagram](./er-diagram.png)
