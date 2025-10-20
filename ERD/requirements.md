@@ -55,3 +55,17 @@ Designing an Entity–Relationship Diagram (ERD) for an Airbnb-like system that 
 - recipient_id (FK → User.user_id)
 - message_body (TEXT, NOT NULL)
 - sent_at (TIMESTAMP, DEFAULT current timestamp)
+
+
+## Relationships & Cardinalities
+
+| Relationship                          | Cardinality                      | FK Location                                  | Rationale                                                                        |
+| ------------------------------------- | -------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------- |
+| **User → Property (hosts)**           | `User (1) —— (0..N) Property`    | `Property.host_id → User.user_id`            | A user may host zero or many properties; each property has exactly one host.     |
+| **User → Booking (makes)**            | `User (1) —— (0..N) Booking`     | `Booking.user_id → User.user_id`             | A user (guest) can make zero or many bookings; each booking belongs to one user. |
+| **Property → Booking (is booked in)** | `Property (1) —— (0..N) Booking` | `Booking.property_id → Property.property_id` | A property can be booked zero or many times; each booking is for one property.   |
+| **Booking → Payment (has)**           | `Booking (1) —— (1..N) Payment`  | `Payment.booking_id → Booking.booking_id`    | Every booking must have at least one payment; partial payments allowed.          |
+| **Property → Review (receives)**      | `Property (1) —— (0..N) Review`  | `Review.property_id → Property.property_id`  | A property can receive zero or many reviews; each review is for one property.    |
+| **User → Review (writes)**            | `User (1) —— (0..N) Review`      | `Review.user_id → User.user_id`              | A user can write zero or many reviews; each review has one author.               |
+| **User → Message (sends)**            | `User (1) —— (0..N) Message`     | `Message.sender_id → User.user_id`           | A user can send zero or many messages; each message has one sender.              |
+| **User → Message (receives)**         | `User (1) —— (0..N) Message`     | `Message.recipient_id → User.user_id`        | A user can receive zero or many messages; each message has one recipient.        |
