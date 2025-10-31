@@ -18,3 +18,24 @@ FROM Booking AS b
 INNER JOIN "User" AS u
   ON u.user_id = b.user_id
 ORDER BY b.created_at DESC;
+
+/* ----------------------------------------------------------
+  LEFT JOIN: retrieving all properties and their reviews,
+     including properties that have no reviews
+----------------------------------------------------------- */
+SELECT
+  p.property_id,
+  p.host_id,
+  p.name AS property_name,
+  p.location,
+  p.pricepernight,
+  p.created_at AS property_created_at,
+  r.review_id,
+  r.user_id AS reviewer_id,
+  r.rating,
+  r.comment,
+  r.created_at AS review_created_at
+FROM Property AS p
+LEFT JOIN Review AS r
+  ON r.property_id = p.property_id
+ORDER BY p.created_at DESC, r.created_at DESC NULLS LAST;
