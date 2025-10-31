@@ -19,7 +19,7 @@ CREATE INDEX IF NOT EXISTS idx_users_role
 CREATE INDEX IF NOT EXISTS idx_users_created_at
   ON users(created_at);
 
--- This is optional: name sort/search
+-- This is ptional: name sort/search
 -- CREATE INDEX IF NOT EXISTS idx_users_last_first
 --   ON users(last_name, first_name);
 
@@ -70,7 +70,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user_start
 
 
 -- =====================
--- (Optional) Supporting indexes
+-- This is for later
 -- =====================
 
 -- Reviews joins (property/user)
@@ -83,7 +83,7 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user_start
 
 
 -- =====================
--- Maintenance (run as needed)
+-- This is for later (Maintenance related)
 -- =====================
 
 -- Refresh planner statistics after creating many indexes
@@ -92,50 +92,3 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user_start
 -- Drop examples (if an index is unused or redundant)
 -- DROP INDEX IF EXISTS idx_properties_loc_price_created;
 -- DROP INDEX IF EXISTS idx_bookings_user_start;
-
-
-
-/* ==========================================================
-   PERFORMANCE MEASUREMENT (for checker)
-   The lines below demonstrate measuring query performance
-   using EXPLAIN ANALYZE as required.
-   ========================================================== */
-
--- Make sure planner stats are fresh
-VACUUM ANALYZE;
-
--- A) Bookings per user (join + aggregate)
-EXPLAIN ANALYZE
-SELECT u.user_id, u.first_name, u.last_name, COUNT(b.booking_id) AS total_bookings
-FROM users u
-LEFT JOIN bookings b ON b.user_id = u.user_id
-GROUP BY u.user_id, u.first_name, u.last_name
-ORDER BY total_bookings DESC
-LIMIT 50;
-
--- B) Bookings per property (join + aggregate)
-EXPLAIN ANALYZE
-SELECT p.property_id, p.name, COUNT(b.booking_id) AS total_bookings
-FROM properties p
-LEFT JOIN bookings b ON b.property_id = p.property_id
-GROUP BY p.property_id, p.name
-ORDER BY total_bookings DESC
-LIMIT 50;
-
--- C) Date window with ORDER BY start_date
-EXPLAIN ANALYZE
-SELECT booking_id, user_id, property_id
-FROM bookings
-WHERE start_date >= DATE '2025-10-01'
-  AND end_date   <= DATE '2025-10-31'
-ORDER BY start_date
-LIMIT 100;
-
--- D) Browse properties (filter + sort)
-EXPLAIN ANALYZE
-SELECT property_id, name, location, price_per_night, created_at
-FROM properties
-WHERE location = 'Cape Town'
-  AND price_per_night BETWEEN 800 AND 1500
-ORDER BY created_at DESC
-LIMIT 50;
