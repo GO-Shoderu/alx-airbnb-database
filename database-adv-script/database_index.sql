@@ -92,3 +92,28 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user_start
 -- Drop examples (if an index is unused or redundant)
 -- DROP INDEX IF EXISTS idx_properties_loc_price_created;
 -- DROP INDEX IF EXISTS idx_bookings_user_start;
+
+-- A') Bookings per user (selective)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT u.user_id, COUNT(*) 
+FROM users u 
+JOIN bookings b ON b.user_id = u.user_id
+WHERE u.user_id = '<some-user-uuid>'
+GROUP BY u.user_id;
+
+-- B') Bookings per property (selective)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT p.property_id, COUNT(*)
+FROM properties p
+JOIN bookings b ON b.property_id = p.property_id
+WHERE p.property_id = '<some-property-uuid>'
+GROUP BY p.property_id;
+
+-- D') Browse with more selectivity (location + tighter price band)
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT property_id, name, location, price_per_night, created_at
+FROM properties
+WHERE location = 'Cape Town'
+  AND price_per_night BETWEEN 1000 AND 1100
+ORDER BY created_at DESC
+LIMIT 50;
