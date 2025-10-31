@@ -2,6 +2,7 @@
   Non-Correlated Subquery: retrieving all properties 
   with average rating > 4.0
 ----------------------------------------------------------- */
+
 SELECT 
     p.property_id,
     p.name AS property_name,
@@ -16,3 +17,22 @@ WHERE p.property_id IN (
     HAVING AVG(r.rating) > 4.0
 )
 ORDER BY p.name;
+
+/* ----------------------------------------------------------
+  Correlated Subquery: retrieving all users 
+  who have made more than 3 bookings
+----------------------------------------------------------- */
+
+SELECT 
+    u.user_id,
+    u.first_name,
+    u.last_name,
+    u.email,
+    u.role
+FROM "User" AS u
+WHERE (
+    SELECT COUNT(*)
+    FROM Booking AS b
+    WHERE b.user_id = u.user_id
+) > 3
+ORDER BY u.first_name;
