@@ -18,3 +18,7 @@ This folder contains SQL queries demonstrating **INNER JOIN**, **LEFT JOIN**, **
 - `subqueries.sql` — contains Subqueries:
     1. **Correlated Subquery**: Finding all users who have made more than 3 bookings.
     2. **Non-Correlated Subquery**: Finding all properties where the average rating is greater than 4.0.  
+
+- `aggregations_and_window_functions.sql` — contains aggregate and window functions:
+    1. **Aggregate**: Getting the total number of bookings made by each user
+    2. **Window function**: Ranking properties based on total number of bookings
