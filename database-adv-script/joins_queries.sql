@@ -39,3 +39,27 @@ FROM Property AS p
 LEFT JOIN Review AS r
   ON r.property_id = p.property_id
 ORDER BY p.created_at DESC, r.created_at DESC NULLS LAST;
+
+/* ----------------------------------------------------------
+  FULL OUTER JOIN: retrieving all users and all bookings,
+     even if the user has no booking OR a booking is not
+     linked to a user (orphan booking)
+----------------------------------------------------------- */
+SELECT
+  u.user_id,
+  u.first_name,
+  u.last_name,
+  u.email,
+  u.role,
+  b.booking_id,
+  b.property_id,
+  b.start_date,
+  b.end_date,
+  b.total_price,
+  b.status,
+  b.created_at AS booking_created_at
+FROM "User" AS u
+FULL OUTER JOIN Booking AS b
+  ON u.user_id = b.user_id
+ORDER BY COALESCE(b.created_at, u.created_at) DESC;
+
