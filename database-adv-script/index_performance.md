@@ -51,6 +51,41 @@ All queries executed with: `EXPLAIN (ANALYZE, BUFFERS, VERBOSE)`
 - Execution Time: **0.057 ms**
 - Plan highlights: **Seq Scan on properties** (small table, low selectivity)
 
+### commands used to measure BEFORE
+```sql
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT u.user_id, u.first_name, u.last_name, COUNT(b.booking_id) AS total_bookings
+FROM users u
+LEFT JOIN bookings b ON b.user_id = u.user_id
+GROUP BY u.user_id, u.first_name, u.last_name
+ORDER BY total_bookings DESC
+LIMIT 50;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT p.property_id, p.name, COUNT(b.booking_id) AS total_bookings
+FROM properties p
+LEFT JOIN bookings b ON b.property_id = p.property_id
+GROUP BY p.property_id, p.name
+ORDER BY total_bookings DESC
+LIMIT 50;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT booking_id, user_id, property_id
+FROM bookings
+WHERE start_date >= DATE '2025-10-01'
+  AND end_date   <= DATE '2025-10-31'
+ORDER BY start_date
+LIMIT 100;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT property_id, name, location, price_per_night, created_at
+FROM properties
+WHERE location = 'Cape Town'
+  AND price_per_night BETWEEN 800 AND 1500
+ORDER BY created_at DESC
+LIMIT 50;
+```
+
 ---
 
 ## 2) Indexes applied
@@ -71,6 +106,31 @@ Script: `database_index.sql` (run inside Docker), followed by `VACUUM ANALYZE;`
 - `idx_bookings_start_end` on `(start_date, end_date)`
 - `idx_bookings_status_created` on `(status, created_at)`
 - `idx_bookings_user_start` on `(user_id, start_date)` INCLUDE `(booking_id, property_id, status, total_price)`
+
+### SQL `CREATE INDEX` commands
+```sql
+-- USERS
+CREATE INDEX IF NOT EXISTS idx_users_role           ON users(role);
+CREATE INDEX IF NOT EXISTS idx_users_created_at     ON users(created_at);
+
+-- PROPERTIES
+CREATE INDEX IF NOT EXISTS idx_properties_host_id   ON properties(host_id);
+CREATE INDEX IF NOT EXISTS idx_properties_loc_price_created
+  ON properties(location, price_per_night, created_at)
+  INCLUDE (property_id, name);
+CREATE INDEX IF NOT EXISTS idx_properties_host_created
+  ON properties(host_id, created_at);
+
+-- BOOKINGS
+CREATE INDEX IF NOT EXISTS idx_bookings_user_id     ON bookings(user_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_property_id ON bookings(property_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_start_end   ON bookings(start_date, end_date);
+CREATE INDEX IF NOT EXISTS idx_bookings_status_created
+  ON bookings(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_bookings_user_start
+  ON bookings(user_id, start_date)
+  INCLUDE (booking_id, property_id, status, total_price);
+```
 
 ---
 
@@ -96,6 +156,42 @@ All queries re-executed with: `EXPLAIN (ANALYZE, BUFFERS, VERBOSE)`
 - **After:** **0.055 ms** (was 0.057 ms)
 - Change: ~**‑3.5%** (effectively unchanged)
 - Plan highlight: still **Seq Scan**; with only ~tens of rows and low selectivity, the planner prefers a cheap full scan.
+
+### commands used to measure AFTER
+```sql
+-- After running database_index.sql and VACUUM ANALYZE
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT u.user_id, u.first_name, u.last_name, COUNT(b.booking_id) AS total_bookings
+FROM users u
+LEFT JOIN bookings b ON b.user_id = u.user_id
+GROUP BY u.user_id, u.first_name, u.last_name
+ORDER BY total_bookings DESC
+LIMIT 50;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT p.property_id, p.name, COUNT(b.booking_id) AS total_bookings
+FROM properties p
+LEFT JOIN bookings b ON b.property_id = p.property_id
+GROUP BY p.property_id, p.name
+ORDER BY total_bookings DESC
+LIMIT 50;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT booking_id, user_id, property_id
+FROM bookings
+WHERE start_date >= DATE '2025-10-01'
+  AND end_date   <= DATE '2025-10-31'
+ORDER BY start_date
+LIMIT 100;
+
+EXPLAIN (ANALYZE, BUFFERS, VERBOSE)
+SELECT property_id, name, location, price_per_night, created_at
+FROM properties
+WHERE location = 'Cape Town'
+  AND price_per_night BETWEEN 800 AND 1500
+ORDER BY created_at DESC
+LIMIT 50;
+```
 
 ---
 
